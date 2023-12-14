@@ -8,10 +8,10 @@ new_output_file="command_output_${random_suffix}.txt"
 
 
 # 定义要查找的命令
-# target_command="sudo python3 -u -m pymobiledevice3 remote start-quic-tunnel"
+# target_command="sudo python3 -u -m pymobiledevice3 remote start-tunnel"
 
 # 使用pgrep查找相关进程的PID
-pids=$(ps -ef | grep "start-quic-tunnel" | grep -v grep | awk '{print $2 }')
+pids=$(ps -ef | grep "start-tunnel" | grep -v grep | awk '{print $2 }')
 
 # 检查是否找到相关进程
 if [ -n "$pids" ]; then
@@ -20,17 +20,18 @@ if [ -n "$pids" ]; then
         sudo kill "$pid"
         echo "已终止进程 $pid"
     done
-else
-    echo "未找到相关进程"
+#else
+#    echo "未找到相关进程"
 fi
 
 
 # 后台执行命令并将其存储到变量中
-nohup sudo python3 -u -m pymobiledevice3 remote start-quic-tunnel > "$new_output_file" 2>&1 &
+nohup sudo python3 -u -m pymobiledevice3 remote start-tunnel > "$new_output_file" 2>&1 &
 command_pid=$!  # 获取后台命令的PID
 echo "Command PID: $command_pid"
 
 # 等待直到获取RSD Address和RSD Port
+echo "Waiting for RSD Address and RSD Port..."
 while true; do
     # 检查后台命令是否已经完成
     if ! ps -p $command_pid > /dev/null; then
@@ -39,8 +40,8 @@ while true; do
     fi
     # 去除颜色和格式字符串
     input_file=$(cat "$new_output_file" | sed -r "s/\x1B\[[0-9;]*[mK]//g")
-    echo "$input_file"
-    echo "Waiting for RSD Address and RSD Port..."
+    [[ "$input_file" ]] && echo "$input_file"
+    #echo "Waiting for RSD Address and RSD Port..."
     rsd_address=$(echo "$input_file" | grep -oE 'RSD Address: [^ ]+' | awk '{print $3}')
     rsd_port=$(echo "$input_file" | grep -oE 'RSD Port: [0-9]+' | awk '{print $3}')
     
@@ -49,7 +50,7 @@ while true; do
         break
     fi
     # 等待一段时间后重新检查
-    sleep 5
+    sleep 1
 done
 
 # 打印提取的值
@@ -57,7 +58,7 @@ echo "RSD Address: $rsd_address"
 echo "RSD Port: $rsd_port"
 
 # 挂载Developer Disk Image
-sudo pymobiledevice3 mounter auto-mount
+#sudo pymobiledevice3 mounter auto-mount
 
 # 修改虚拟位置
 latitude="$1"
@@ -67,7 +68,8 @@ echo "Longitude: $longitude"
 
 # 使用RSD Address和RSD Port设置虚拟位置
 pymobiledevice3 developer dvt simulate-location set --rsd "$rsd_address" "$rsd_port" -- "$latitude" "$longitude"
+#script a.txt "pymobiledevice3 developer dvt simulate-location set --rsd $rsd_address $rsd_port -- $latitude $longitude"
 
 # 结束后台命令
-kill "$command_pid"
+#kill "$command_pid"
 rm "$new_output_file"
