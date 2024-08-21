@@ -2,13 +2,13 @@
 set -e
 
 pwd=quan
-# 26.578[100-560] 106.736[360-460]
-latitude=26.578
-longitude=106.736
-latBegin=100
-latEnd=560
-lngBegin=360
-lngEnd=460
+# 106.64[20-40] 26.62[20-60]
+longitude=106.64
+latitude=26.62
+lngBegin=20
+lngEnd=40
+latBegin=20
+latEnd=60
 
 
 randomNum() {
@@ -18,15 +18,16 @@ randomNum() {
 }
 
 # 随机生成经纬度后缀
-latVal=$(randomNum "$latBegin" "$latEnd")
 lngVal=$(randomNum "$lngBegin" "$lngEnd")
+latVal=$(randomNum "$latBegin" "$latEnd")
 
-latitude=${latitude}${latVal}
+# 组装经纬度
 longitude=${longitude}${lngVal}
-echo "random-gps: $latitude $longitude"
+latitude=${latitude}${latVal}
+echo "random-gps: $longitude $latitude"
 echo
 
-echo "$pwd" | sudo -S ./change_ios_position.sh $latitude $longitude
+echo "$pwd" | sudo -S ./change_ios_position.sh $longitude $latitude
 
 #pgrep -f simulate-location | xargs kill -9
 

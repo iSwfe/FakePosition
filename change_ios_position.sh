@@ -61,10 +61,10 @@ echo "RSD Port: $rsd_port"
 #sudo pymobiledevice3 mounter auto-mount
 
 # 修改虚拟位置
-latitude="$1"
-longitude="$2"
-echo "Latitude: $latitude"
+longitude="$1"
+latitude="$2"
 echo "Longitude: $longitude"
+echo "Latitude: $latitude"
 
 # 使用RSD Address和RSD Port设置虚拟位置
 pymobiledevice3 developer dvt simulate-location set --rsd "$rsd_address" "$rsd_port" -- "$latitude" "$longitude"
